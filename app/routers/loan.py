@@ -5,6 +5,7 @@ from app.config.settings import SETTINGS
 from typing import Optional
 from io import BytesIO
 from app.utils.pdf_reader import extract_pdf_text
+from app.services.llm import get_ais_summary,get_bank_statement_summary
 import enum
 
 router = APIRouter()
@@ -30,6 +31,10 @@ async def submit_loan(
 ):
     bank_statement_text = await extract_pdf_text(bank_statement)
     ais_text = await extract_pdf_text(ais)
+    bank_summary = await get_bank_statement_summary(bank_statement_text)
+    ais_summary = await get_ais_summary(ais_text)
+    print(bank_summary)
+
     return JSONResponse(
         status_code=200, 
         content={"status": "success", "message": "File uploaded successfully"}
