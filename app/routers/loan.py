@@ -1,11 +1,10 @@
 from fastapi import APIRouter, HTTPException, UploadFile, Form, File
 from fastapi.responses import JSONResponse
-from pypdf import PdfReader
 from app.config.settings import SETTINGS
 from typing import Optional
-from io import BytesIO
 from app.utils.pdf_reader import extract_pdf_text
-from app.services.llm import get_ais_summary,get_bank_statement_summary
+from app.services.llm import get_ais_summary,get_bank_statement_summary,get_creditx_score
+from app.services.supabase import insert_request,get_org_requests
 import enum
 
 router = APIRouter()
@@ -15,9 +14,21 @@ class LoanType(str, enum.Enum):
     PERSONAL = "personal"
     CAR = "car"
     EDUCATION = "education"
+    BUSINESS  = "business"
 
 
-# extract the pdf's information and pass it to the llm
+buerau_data = {
+    "equifax": {
+        "ABCDE1234F": {
+        "USERNAME": "Vikas Rambilas Mundada",
+        "CREDIT_SCORE": 770,
+        "CURRENT_LOANS": [{ "AMOUNT": 500000, "BANK": "HDFC Bank", "TIME_PERIOD": "5 years" }],
+        "NO_OF_TIMES_DEFAULTED": { "HDFC Bank": 2 },
+        "SETTLED_LOANS": [{ "AMOUNT": 300000, "BANK": "SBI", "TIME_PERIOD": "4 years" }],
+        "MISSED_PAYMENTS": { "HDFC Bank": 3 }
+        }}
+} 
+
 @router.post("/submit")
 async def submit_loan(
     first_name: str = Form(...),
@@ -27,13 +38,16 @@ async def submit_loan(
     pan_id: str = Form(...),
     ais: UploadFile =  File(...),
     loan_description: str = Form(...),
+    org_id:str = Form(...),
+    user_id:str = Form(...),
     bank_statement: UploadFile = File(...)
 ):
     bank_statement_text = await extract_pdf_text(bank_statement)
     ais_text = await extract_pdf_text(ais)
     bank_summary = await get_bank_statement_summary(bank_statement_text)
     ais_summary = await get_ais_summary(ais_text)
-    print(bank_summary)
+    final_credit_summary = await get_creditx_score(bank_summary=bank_statement,ais_summary=ais_summary,bureau_data=buerau_data)
+    await insert_request(user_id=user_id,org_id=org_id,loan_type=loan_type,loan_description=loan_description,bank_summary=bank_summary,ais_summary=ais_summary,creditx_score=final_credit_summary)
 
     return JSONResponse(
         status_code=200, 

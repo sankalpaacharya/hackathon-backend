@@ -1,93 +1,69 @@
-def credit_score_prompt_maker(bank_summary,ais_summary,bureau_data):
+def credit_score_prompt_maker(bank_summary, ais_summary, bureau_data):
+
     prompt = f""" 
-You are an expert credit risk analyst. Analyze the applicant's financial health and creditworthiness based on the following data sources:
+You are an expert credit risk analyst with deep experience in assessing loan applications for financial institutions. Analyze the applicant's financial health and creditworthiness based on the following structured data sources:
 
 1. Annual Information Statement (AIS) Summary
 2. Bank Statement Summary
 3. Multi-Bureau Aggregated API Data (excluding the normalized credit score)
 
 Your task:
-- Evaluate the applicant’s credit risk
-- Recommend a loan approval decision (Approve / Decline / Approve with Conditions)
-- Suggest appropriate lending terms (Loan amount, interest rate, tenure)
-- Provide risk mitigation strategies, if required
+- Conduct a comprehensive evaluation of the applicant’s credit risk profile.
+- Recommend a clear and actionable lending decision (Approve / Decline / Approve with Conditions).
+- Suggest appropriate lending terms (Maximum Loan Amount, Interest Rate Range, Tenure, Collateral Requirement).
+- Provide risk mitigation strategies, if any risks are identified.
+
+Be objective, data-driven, and concise in your analysis. Avoid any assumptions not supported by the provided data.
 
 ---
 
-Data Inputs:
+### Data Inputs:
 
 AIS Summary:
-- Total Interest Income (Savings + Term Deposits): ₹[ENTER HERE]
-- Mutual Fund Sale Proceeds: ₹[ENTER HERE]
-- Other Income Reported: ₹[ENTER HERE]
-- Tax Paid / Refund Status: ₹[ENTER HERE]
-- PAN Verified: [Yes/No]
+{ais_summary}
+---
 
 Bank Statement Summary:
-- Average Monthly Balance: ₹[ENTER HERE]
-- Total Credits in Last 6 Months: ₹[ENTER HERE]
-- Total Debits in Last 6 Months: ₹[ENTER HERE]
-- Loan EMIs Paid: ₹[ENTER HERE]
-- Overdraft / Negative Balances: [Yes/No]
-- Cheque Bounce Instances: [ENTER NUMBER]
-- Cash Flow Trend: [Stable/Volatile]
+{bank_summary}
+---
 
-Multi-Bureau API Data (other than normalized credit score):
-{
-  "status": "success",
-  "message": {
-    "USERNAME": "[ENTER NAME]",
-    "CREDIT_SCORE": [ENTER SCORE],
-    "CURRENT_LOANS": [
-      {
-        "AMOUNT": [ENTER AMOUNT],
-        "BANK": "[ENTER BANK]",
-        "TIME_PERIOD": "[ENTER TIME PERIOD]"
-      }
-    ],
-    "NO_OF_TIMES_DEFAULTED": {
-      "[ENTER BANK]": [ENTER COUNT]
-    },
-    "SETTLED_LOANS": [
-      {
-        "AMOUNT": [ENTER AMOUNT],
-        "BANK": "[ENTER BANK]",
-        "TIME_PERIOD": "[ENTER TIME PERIOD]"
-      }
-    ],
-    "MISSED_PAYMENTS": {
-      "[ENTER BANK]": [ENTER COUNT]
-    }
-  }
-}
+Multi-Bureau API Data (excluding normalized credit score):
+
+{bureau_data}
+---
+
+### Output Instructions:
+
+Provide your output strictly in **valid JSON** format, structured as follows. Each key must contain a detailed and accurate response based on the data provided.
+
+{{
+    "Applicant Profile Summary": "[Summarize the applicant’s financial and credit profile. Mention income streams, property transactions, rent/dividends/interest, average balances, and high-value assets.]",
+
+    "Creditworthiness Assessment": "[Discuss bureau scores, number of defaults/missed payments, current loan obligations, past settled loans, cash flow analysis, income consistency, and any factors impacting creditworthiness.]",
+
+    "Identified Risks": "[List all potential risks such as defaults, missed payments, high debt-to-income ratio, overexposure to loans, and significant liabilities.]",
+
+    "Final Lending Decision": "[State one of these decisions clearly: Approve / Decline / Approve with Conditions]",
+
+    "Justification for the Decision": "[Explain in detail why the decision was made based on risk and creditworthiness assessment. Mention stability of income, existing liabilities, repayment behavior, and cash flow strength.]",
+
+    "Recommended Lending Terms": {{
+        "Maximum Loan Amount": "[Specify the recommended maximum loan amount, justified by the applicant’s profile.]",
+        "Interest Rate Range": "[Specify a realistic interest rate range that aligns with the risk profile.]",
+        "Tenure": "[State a suitable loan tenure in months/years.]",
+        "Collateral Requirement": "[Specify whether collateral is required. If Yes, mention type and suggested value.]"
+    }},
+
+    "Risk Mitigation Suggestions": "[Suggest any risk mitigation actions such as mandatory collateral, guarantor requirement, EMI auto-debit mandates, shorter tenure, etc.]"
+}}
 
 ---
 
-Output Instructions:
-Provide a comprehensive recommendation report, including:
-
-1. Applicant Profile Summary
-2. Creditworthiness Assessment
-3. Identified Risks
-4. Final Lending Decision: Approve / Decline / Approve with Conditions
-5. Justification for the Decision
-6. Recommended Lending Terms:
-   - Maximum Loan Amount
-   - Interest Rate Range
-   - Tenure
-   - Collateral Requirement
-7. Risk Mitigation Suggestions
-
-only provide a json data no other text than json data
-
-here is the bank statement summary:-
-{bank_summary}
-
-here is the ais summary:-
-{ais_summary}
-
-
-here is the Bureau data:-
-{bureau_data}
-
+### Output Guidelines:
+- Provide factual and data-driven insights only.
+- Do not include any text outside of the JSON block.
+- Ensure all fields in the JSON are filled, even if with 'None' where appropriate.
+- Your analysis should reflect the data inputs accurately and logically.
+- Only provide the JSON String nothing else than that
 """
+    return prompt
