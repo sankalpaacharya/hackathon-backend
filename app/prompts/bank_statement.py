@@ -44,6 +44,7 @@ Overall Summary
 * Notable income trend: [brief observation about income pattern, consistency, or bulk transfers]
 * Financial stability: [short comment on risk indicators – e.g., consistent spending, low balance, high volatility, etc.]
 
+Make the month wise report in a paragraph so that i can split it by paragraph and genreate the vector embeddings
 Here is the bank statement data: 
 {statements}
 """

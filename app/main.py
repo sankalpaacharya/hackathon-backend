@@ -7,7 +7,7 @@ app = FastAPI(title="hackathon-backend")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["physically-improved-dolphin.ngrok-free.app"], 
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"], 
     allow_headers=["*"], 
