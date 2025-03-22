@@ -28,6 +28,7 @@ buerau_data = {
         "MISSED_PAYMENTS": { "HDFC Bank": 3 }
         }}
 } 
+import asyncio
 
 @router.post("/submit")
 async def submit_loan(
@@ -38,23 +39,33 @@ async def submit_loan(
     pan_id: str = Form(...),
     ais: UploadFile =  File(...),
     loan_description: str = Form(...),
-    org_id:str = Form(...),
-    user_id:str = Form(...),
+    org_id: str = Form(...),
+    user_id: str = Form(...),
     bank_statement: UploadFile = File(...)
 ):
-    bank_statement_text = await extract_pdf_text(bank_statement)
-    ais_text = await extract_pdf_text(ais)
-    bank_summary = await get_bank_statement_summary(bank_statement_text)
-    ais_summary = await get_ais_summary(ais_text)
-    final_credit_summary = await get_creditx_score(bank_summary=bank_statement,ais_summary=ais_summary,bureau_data=buerau_data)
-    await insert_request(user_id=user_id,org_id=org_id,loan_type=loan_type,loan_description=loan_description,bank_summary=bank_summary,ais_summary=ais_summary,creditx_score=final_credit_summary)
+    bank_statement_text, ais_text = await asyncio.gather(
+        extract_pdf_text(bank_statement), 
+        extract_pdf_text(ais)
+    )
+
+    bank_summary, ais_summary = await asyncio.gather(
+        get_bank_statement_summary(bank_statement_text),
+        get_ais_summary(ais_text)
+    )
+
+    final_credit_summary = await get_creditx_score(
+        bank_summary=bank_summary, 
+        ais_summary=ais_summary, 
+        bureau_data=buerau_data
+    )
+
+    insert_request(
+        user_id=user_id, org_id=org_id, loan_type=loan_type, 
+        loan_description=loan_description, bank_summary=bank_summary, 
+        ais_summary=ais_summary, creditx_score=final_credit_summary
+    )
 
     return JSONResponse(
         status_code=200, 
         content={"status": "success", "message": "File uploaded successfully"}
     )
-
-
-@router.get("/status")
-async def check_status():
-    return JSONResponse(status_code=200, content={"status": "error", "message": "Your loan application is pending"})

@@ -14,10 +14,10 @@ headers = {
 async def fetch_llama(prompt: str):
     payload = {
         "messages": [{"role": "user", "content": prompt}],
-        "max_token":2048
+        "max_tokens":2048
     }
 
-    async with httpx.AsyncClient(timeout=30) as client:
+    async with httpx.AsyncClient(timeout=3600) as client:
         response = await client.post(url, headers=headers, json=payload)
         return response.json()
 

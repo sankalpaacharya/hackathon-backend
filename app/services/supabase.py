@@ -1,5 +1,5 @@
-import os
 from supabase import create_client, Client
+import json
 from app.config.settings import SETTINGS
 
 url: str = SETTINGS.supabase_url
@@ -15,12 +15,18 @@ def insert_request(user_id,org_id,loan_type,loan_description,ais_summary,bank_su
         "loan_type":loan_type,
         "ais_summary":ais_summary,
         "bank_summary":bank_summary,
-        "creditx_score":creditx_score,
+        "creditx_score":json.loads(creditx_score),
         "status":"pending"
     }
     response = supabase.table("Request").insert(data).execute()
     return response
 
 def get_org_requests(org_id: str):
-    response = supabase.table("Request").select("*, user_id").eq("org_id", org_id).execute()
+    response = (
+        supabase
+        .table("Request")
+        .select("status, loan_type, user_id!inner(pan, first_name, last_name)")
+        .eq("org_id", org_id)
+        .execute()
+    )
     return response
