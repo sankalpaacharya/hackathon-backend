@@ -30,3 +30,7 @@ def get_org_requests(org_id: str):
         .execute()
     )
     return response
+
+def get_request(request_id:str):
+    response = supabase.table("Request").select("*").eq("id",request_id).execute()
+    return response

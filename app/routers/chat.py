@@ -12,4 +12,4 @@ class ChatRequest(BaseModel):
 
 @router.get("/")
 async def chat(request:ChatRequest):
-    pass
+   pass 
