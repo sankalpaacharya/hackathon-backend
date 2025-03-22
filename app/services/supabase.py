@@ -25,7 +25,7 @@ def get_org_requests(org_id: str):
     response = (
         supabase
         .table("Request")
-        .select("status, loan_type, user_id!inner(pan, first_name, last_name)")
+        .select("status, loan_type, creditx_score, user_id!inner(pan, first_name, last_name)")
         .eq("org_id", org_id)
         .execute()
     )

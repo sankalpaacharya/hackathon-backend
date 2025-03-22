@@ -34,3 +34,7 @@ async def get_ais_summary(ais_text:str):
 async def get_creditx_score(bank_summary:str,ais_summary:str,bureau_data:str):
     response = await fetch_llama(credit_score_prompt_maker(bank_summary=bank_summary,ais_summary=ais_summary,bureau_data=bureau_data))
     return response["result"]["response"]
+
+
+async def chat(request_id:str,query:str):
+   pass 
